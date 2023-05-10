@@ -12,12 +12,11 @@ class Racecar extends Phaser.GameObjects.Sprite {
 
         // Movement variables
         this.moveSpeed = 3;
-    }
+        this.transitionTime = 500; // in ms
 
-    update () {
-    }
-
-    reset () {
+        // Health variables
+        this.totalHealth = 3;
+        this.currentHealth = this.currentHealth;
     }
 }
 
@@ -35,6 +34,8 @@ class HorizontalMoveState extends State {
             this.stateMachine.transition('transition', false);
             return;
         }
+
+        console.log("IN here");
 
         // Handle horizontal movement movement
         if (keyA.isDown && racecar.x > racecarLeftBorder) {
@@ -57,33 +58,57 @@ class HorizontalMoveState extends State {
 class VerticalTransitionState extends State {
     enter (scene, racecar, movingUp) {
         this.movingUp = movingUp;
-    }
 
-    execute (scene, racecar) {
-        // for now, immediately send the player to the next lane
+        this.newY = 0;
         if (this.movingUp) {
             racecar.currentLane -= 1;
+
             // Check for unusual instance of miscounting
             if (racecar.currentLane < 0) {
                 racecar.currentLane = 0;
             }
-            racecar.y -= roadLaneSize;
 
-            this.stateMachine.transition('move');
-            return;
+            if (racecar.currentLane == 0) {
+                this.newY = topLane;
+            }
+            else if (racecar.currentLane == 1) {
+                this.newY = midLane;
+            }
         }
         else {
             racecar.currentLane += 1;
+
             // Check for unusual instance of miscounting
             if (racecar.currentLane > 2) {
                 racecar.currentLane = 2;
             }
-            racecar.y += roadLaneSize;
 
-            this.stateMachine.transition('move');
-            return;
+            if (racecar.currentLane == 1) {
+                this.newY = midLane;
+            }
+            else if (racecar.currentLane == 2) {
+                this.newY = botLane;
+            }
         }
-        console.log(this.movingUp);
+    }
+
+    execute (scene, racecar) {
+        // Code from:
+        // https://labs.phaser.io/view.html?src=src/tweens/eases/linear.js
+
+        //console.log("from: ", racecar.y, ", to: ", this.newY);
+        this.moveTween = scene.tweens.add({
+            targets: racecar,
+            y: this.newY,
+            //y: { from: racecar.y, to: this.newY },
+            duration: 75,
+            ease: 'Cubic',
+            onComplete: function() {
+                this.stateMachine.transition('move');
+                return;
+            }.bind(this),
+            onCompleteScope: this,
+        });
     }
 }
 

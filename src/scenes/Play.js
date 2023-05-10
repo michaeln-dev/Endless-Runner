@@ -22,6 +22,16 @@ class Play extends Phaser.Scene {
             damaged: new DamagedSpinOut()
         }, [this, this.racecar]);
 
+        // Create a score label
+        let scoreConfig = {
+            fontFamily: 'Courier',
+            fontSize: '28px',
+            color: '#ffffff',
+            align: 'center',
+        };
+        this.score = this.add.text(game.config.width / 2, 16, 
+            "000000000000000", scoreConfig).setOrigin(0.5, 0.5);
+
         // Define keys
         keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
         keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);

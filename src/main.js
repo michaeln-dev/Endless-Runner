@@ -1,4 +1,4 @@
-// Time spent: 3 hours
+// Time spent: 6 hours
 
 let config = {
     type: Phaser.CANVAS,
