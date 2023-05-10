@@ -14,8 +14,8 @@ let keyW, keyA, keyS, keyD;
 
 
 // Create player racecar borders
-let racecarLeftBorder = 100;
-let racecarRightBorder = 500;
+let racecarLeftBorder = game.config.width / 7.8; // leftBorder = 100 px
+let racecarRightBorder = game.config.width / 1.3; // leftBorder = 600 px
 
 // Create border sizes for the road and lanes
 let edgeGrassSize = game.config.height / 6; // grassSize = 60 px

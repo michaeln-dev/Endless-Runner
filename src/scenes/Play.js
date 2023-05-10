@@ -14,9 +14,24 @@ class Play extends Phaser.Scene {
 
         // Create the racecar
         this.racecar = new Racecar(this, 0, 0, 'racecar');
+
+        // initialize racecar state machine (initial state, possible states, state args[])
+        this.racecarFSM = new StateMachine('move', {
+            move: new HorizontalMoveState(),
+            transition: new VerticalTransitionState(),
+            damaged: new DamagedSpinOut()
+        }, [this, this.racecar]);
+
+        // Define keys
+        keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
+        keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
+        keyW = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
+        keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
     }
 
     update () {
         this.road.tilePositionX += 7;
+
+        this.racecarFSM.step();
     }
 }
