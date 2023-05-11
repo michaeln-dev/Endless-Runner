@@ -35,7 +35,7 @@ class HorizontalMoveState extends State {
             return;
         }
 
-        console.log("IN here");
+        //console.log("IN here");
 
         // Handle horizontal movement movement
         if (keyA.isDown && racecar.x > racecarLeftBorder) {
