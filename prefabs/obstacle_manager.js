@@ -4,12 +4,11 @@ class ObstacleManager extends Phaser.GameObjects.Container {
         scene.add.existing(this);
 
         this.moveSpeed = 6;
-        console.log(this.moveSpeed);
 
         // The obstacle container's obstacle children
-        this.lane1Obstacle = new Obstacle(scene, this.x, this.y - roadLaneSize, 'racecar', 0, this.moveSpeed);
-        this.lane2Obstacle = new Obstacle(scene, this.x, this.y, 'racecar', 0, this.moveSpeed);
-        this.lane3Obstacle = new Obstacle(scene, this.x, this.y + roadLaneSize, 'racecar', 0, this.moveSpeed);
+        this.lane1Obstacle = new Obstacle(scene, this.x, this.y - roadLaneSize, 'dummycar', 0, this.moveSpeed);
+        this.lane2Obstacle = new Obstacle(scene, this.x, this.y, 'dummycar', 0, this.moveSpeed);
+        this.lane3Obstacle = new Obstacle(scene, this.x, this.y + roadLaneSize, 'dummycar', 0, this.moveSpeed);
 
         // Positional variables
         this.startX = this.x;
@@ -18,32 +17,33 @@ class ObstacleManager extends Phaser.GameObjects.Container {
         this.endY = this.y;
 
         this.currentWave = currentWave;
-        this.waveStarted = false;
+        this.hoardStarted = false;
     }
 
     update () {
         // Move the container along with the children so that the container can trigger 
-        if (this.waveStarted) {
+        if (this.hoardStarted) {
             this.x -= this.moveSpeed;
             this.lane1Obstacle.x -= this.moveSpeed;;
             this.lane2Obstacle.x -= this.moveSpeed;;
             this.lane3Obstacle.x -= this.moveSpeed;;
 
             if (this.x <= this.endX) {
-                this.waveStarted = false;
+                this.hoardStarted = false;
                 this.resetWave();
-                this.createWave();
             }
         }
     }
 
     createWave () {
-        // Implementation of barrier waves:
+        // Implementation of barrier hoards:
         // 1.) ObstacleManager is a container object which will store the obstacles as its children
-        // 2.) Depending on the wave, randomly decide which waves will have an obstacle on it
+        // 2.) Depending on the wave, randomly decide which lanes will have an obstacle on it
         // 3.) Pass the createObstacle function an array of what lanes have obstacles. Ex: [1, 0, 1]
-        // 4.) Enable the wave started flag so that the wave can actually move
-        // 5.) Once the children reach the left end of the screen, reset the positions and stop wave
+        // 4.) Enable the obstacles notated by the given array
+        // 5.) Enable the wave started flag so that the wave can actually move
+        // 6.) Move the ObstacleManager container in tandem with the obstacle children
+        // 7.) Once the children reach the left end of the screen, reset the positions and stop hoard
 
         // Find the probability
         if (this.currentWave == 2) {
@@ -100,7 +100,7 @@ class ObstacleManager extends Phaser.GameObjects.Container {
             this.createObstacles(this.getSingleLaneArray());
         }
 
-        this.waveStarted = true;
+        this.hoardStarted = true;
     }
 
     getSingleLaneArray () {

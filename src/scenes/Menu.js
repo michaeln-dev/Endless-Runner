@@ -5,7 +5,8 @@ class Menu extends Phaser.Scene {
 
     preload () {
         // load images
-        this.load.image('racecar', './assets/dummy_car.png');
+        this.load.image('racecar', './assets/racecar.png');
+        this.load.image('dummycar', './assets/dummy_car.png');
     }
     
     create () {
