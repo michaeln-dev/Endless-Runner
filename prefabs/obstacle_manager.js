@@ -3,21 +3,22 @@ class ObstacleManager extends Phaser.GameObjects.Container {
         super(scene, x, y);
         scene.add.existing(this);
 
+        // <--------------------------- Container Management Variables -----------------> //
         this.moveSpeed = 6;
 
+        // Positional variables
+        this.startX = this.x;
+        this.endX = -(game.config.width/19.5); // 40 px
+
+        // Game management variables
+        this.currentWave = currentWave;
+        this.hoardStarted = false;
+
+        // <--------------------------- Object Children -------------------------------> //
         // The obstacle container's obstacle children
         this.lane1Obstacle = new Obstacle(scene, this.x, this.y - roadLaneSize, 'dummycar', 0, this.moveSpeed);
         this.lane2Obstacle = new Obstacle(scene, this.x, this.y, 'dummycar', 0, this.moveSpeed);
         this.lane3Obstacle = new Obstacle(scene, this.x, this.y + roadLaneSize, 'dummycar', 0, this.moveSpeed);
-
-        // Positional variables
-        this.startX = this.x;
-        this.startY = this.y;
-        this.endX = -(game.config.width/19.5); // 40 px
-        this.endY = this.y;
-
-        this.currentWave = currentWave;
-        this.hoardStarted = false;
     }
 
     update () {
@@ -82,9 +83,9 @@ class ObstacleManager extends Phaser.GameObjects.Container {
             }
         }
         else if (this.currentWave == 5) {
-            // 25% chance of three obstacles, 70% chance of two, %5 chance of one
+            // 50% chance of three obstacles, 45% chance of two, %5 chance of one
             let probability = Phaser.Math.Between(1, 100)
-            if (probability <= 25) {
+            if (probability <= 50) {
                 this.createObstacles(this.getTripleLaneArray());
             }
             else if (probability <= 95) {
@@ -157,5 +158,16 @@ class ObstacleManager extends Phaser.GameObjects.Container {
         this.lane1Obstacle.x = this.startX;
         this.lane2Obstacle.x = this.startX;
         this.lane3Obstacle.x = this.startX;
+    }
+
+    changeWave (newWaveNumber=1) {
+        this.currentWave = newWaveNumber;
+
+        if (this.currentWave == 3) {
+            this.moveSpeed = 7;
+        }
+        else if (this.currentWave == 5) {
+            this.moveSpeed = 9;
+        }
     }
 }

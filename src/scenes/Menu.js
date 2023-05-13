@@ -10,11 +10,17 @@ class Menu extends Phaser.Scene {
     }
     
     create () {
-        // Automatically load into the next scene
-        this.scene.start('playScene');
-        console.log("Opened");
+        // <------------------------------ Keyboard Input ---------------------------> //
+        // Define keys
+        keyENTER = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
+
+        console.log("flarbis");
     }
 
     update () {
+        // If the player presses enter, change scene
+        if (Phaser.Input.Keyboard.JustDown(keyENTER)) {
+            this.scene.start('playScene');
+        }
     }
 }

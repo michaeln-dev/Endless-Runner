@@ -12,11 +12,21 @@ class Racecar extends Phaser.GameObjects.Sprite {
 
         // Movement variables
         this.moveSpeed = 3;
-        this.transitionTime = 500; // in ms
+        this.transitionTime = 50; // in ms
 
         // Health variables
         this.totalHealth = 3;
-        this.currentHealth = this.currentHealth;
+        this.currentHealth = this.totalHealth;
+        this.damaged = false;
+    }
+
+    takeDamage (damageAmount) {
+        this.currentHealth -= damageAmount;
+
+        if (this.currentHealth <= 0) {
+            return true;
+        }
+        return false;
     }
 }
 
@@ -96,19 +106,38 @@ class VerticalTransitionState extends State {
         // Code from:
         // https://labs.phaser.io/view.html?src=src/tweens/eases/linear.js
 
-        //console.log("from: ", racecar.y, ", to: ", this.newY);
         this.moveTween = scene.tweens.add({
             targets: racecar,
             y: this.newY,
-            //y: { from: racecar.y, to: this.newY },
-            duration: 75,
+            duration: 50,
             ease: 'Cubic',
-            onComplete: function() {
-                this.stateMachine.transition('move');
-                return;
-            }.bind(this),
+            onComplete: this.finishedTransition.bind(this, racecar),
+            onCompleteParams: [racecar],
             onCompleteScope: this,
         });
+
+        // Handle horizontal movement movement
+        if (keyA.isDown && racecar.x > racecarLeftBorder) {
+            racecar.x -= racecar.moveSpeed;
+
+            if (racecar.x < racecarLeftBorder) {
+                racecar.x = racecarLeftBorder;
+            }
+        }
+        else if (keyD.isDown && racecar.x < racecarRightBorder) {
+            racecar.x += racecar.moveSpeed;
+
+            if (racecar.x > racecarRightBorder) {
+                racecar.x = racecarRightBorder;
+            }
+        }
+    }
+
+    finishedTransition (racecar) {
+        if (racecar.y == this.newY) {
+            this.stateMachine.transition('move');
+            return;
+        }
     }
 }
 

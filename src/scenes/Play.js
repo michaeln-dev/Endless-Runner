@@ -18,6 +18,7 @@ class Play extends Phaser.Scene {
         //this.hoardPerWave = [7, 5, 5, 6];
         this.hoardPerWave = [1, 1, 1, 1];
         this.hoardsSent = 0;
+        this.hoardInterval = 500; // in ms
 
         // Game management booleans
         this.gameEnded = false;
@@ -84,19 +85,41 @@ class Play extends Phaser.Scene {
 
         // <--------------------------------- Begin Game -----------------------------> //
         // Send the first wave after a few seconds
-        this.time.delayedCall(2500, () => {
+        this.time.delayedCall(2000, () => {
             this.centerText.alpha = 0;
-            this.obstacleWave.createWave();
-            this.hoardsSent += 1;
             this.gameStarted = true;
-            this.hoardQueued = false
+
+            this.newHoard(this.hoardInterval);
         }, null, this);
+
+        console.log("snoppomoppopiea");
     }
 
     update () {
         // Update the game objects
         this.racecarFSM.step();
         this.obstacleWave.update();
+
+        // Check for object collision
+        // Player - obstacle collision
+        if(this.obstacleWave.lane1Obstacle.isCollisionActive && this.checkCollision(this.racecar, this.obstacleWave.lane1Obstacle)) {
+            this.obstacleWave.lane1Obstacle.disableObstacle();
+            if (this.racecar.takeDamage(1)) {
+                console.log("The player has died");
+            }
+        }
+        if(this.obstacleWave.lane2Obstacle.isCollisionActive && this.checkCollision(this.racecar, this.obstacleWave.lane2Obstacle)) {
+            this.obstacleWave.lane2Obstacle.disableObstacle();
+            if (this.racecar.takeDamage(1)) {
+                console.log("The player has died");
+            }
+        }
+        if(this.obstacleWave.lane3Obstacle.isCollisionActive && this.checkCollision(this.racecar, this.obstacleWave.lane3Obstacle)) {
+            this.obstacleWave.lane3Obstacle.disableObstacle();
+            if (this.racecar.takeDamage(1)) {
+                console.log("The player has died");
+            }
+        }
 
         // Run different logic functions depending on what wave it currently is
         if (this.currentWave == 5) {
@@ -123,7 +146,7 @@ class Play extends Phaser.Scene {
         if (!this.obstacleWave.hoardStarted && !this.hoardQueued) {
             if (this.hoardsSent == this.hoardPerWave[0]) {
                 // Time for next wave
-                this.newWave(2, "SPEED UP");
+                this.newWave(2, "SPEED UP", 400);
             }
             else {
                 this.newHoard();
@@ -138,7 +161,7 @@ class Play extends Phaser.Scene {
         if (!this.obstacleWave.hoardStarted && !this.hoardQueued) {
             if (this.hoardsSent == this.hoardPerWave[1]) {
                 // Time for next wave
-                this.newWave(3, "SPEED UP");
+                this.newWave(3, "SPEED UP", 300);
             }
             else {
                 this.newHoard();
@@ -152,7 +175,7 @@ class Play extends Phaser.Scene {
         if (!this.obstacleWave.hoardStarted && !this.hoardQueued) {
             if (this.hoardsSent == this.hoardPerWave[2]) {
                 // Time for next wave
-                this.newWave(4, "SPEED UP");
+                this.newWave(4, "SPEED UP", 150);
             }
             else {
                 this.newHoard();
@@ -166,7 +189,7 @@ class Play extends Phaser.Scene {
         if (!this.obstacleWave.hoardStarted && !this.hoardQueued) {
             if (this.hoardsSent == this.hoardPerWave[3]) {
                 // Time for next wave
-                this.newWave(5, "MAX SPEED");
+                this.newWave(5, "MAX SPEED", 0);
             }
             else {
                 this.newHoard();
@@ -186,19 +209,20 @@ class Play extends Phaser.Scene {
         this.hoardQueued = true;
 
         // Create small delay before spawning in new hoard
-        this.time.delayedCall(500, () => {
+        this.time.delayedCall(this.hoardInterval, () => {
             this.obstacleWave.createWave();
             this.hoardsSent += 1;
             this.hoardQueued = false;
         }, null, this);
     }
 
-    newWave (newWaveNumber, newWaveText) {
+    newWave (newWaveNumber, newWaveText, newHoardInterval=500) {
         // Handle wave transition logic
         this.hoardsSent = 0;
         this.hoardQueued = true;
+        this.hoardInterval = newHoardInterval;
         this.currentWave = newWaveNumber;
-        this.obstacleWave.currentWave = this.currentWave;
+        this.obstacleWave.changeWave(this.currentWave);
 
         // Update the center screen text
         this.centerText.text = newWaveText
@@ -209,12 +233,17 @@ class Play extends Phaser.Scene {
             this.centerText.alpha = 0;
 
             // Tiny delay before first hoard spawns
-            this.newWaveDownTimeTimer = this.time.delayedCall(500, () => {
-                this.obstacleWave.createWave();
-                this.hoardsSent += 1;
-                this.hoardQueued = false;
-            }, null, this);
+            this.newHoard(this.hoardInterval);
 
         }, null, this);
+    }
+
+    checkCollision (racecar, obstacle) {
+        if (racecar.x < obstacle.x + obstacle.width && racecar.x + racecar.width > obstacle.x && 
+            racecar.y < obstacle.y + obstacle.height && racecar.height + racecar.y > obstacle. y) {
+            return true;
+          } else {
+            return false;
+          }
     }
 }
