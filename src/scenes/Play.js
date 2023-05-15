@@ -6,6 +6,10 @@ class Play extends Phaser.Scene {
     preload () {
         // Load images
         this.load.image('road', './assets/road.png');
+
+        // Load sound effects
+        this.load.audio('engine_sound', './assets/engine_sound.wav');
+        this.load.audio('racecar_explosion_sound', './assets/racecar_explosion.wav');
     }
     
     create () {
@@ -21,8 +25,12 @@ class Play extends Phaser.Scene {
         this.hoardInterval = 500; // in ms
 
         // Game management booleans
+        this.playerDied = false;
         this.gameEnded = false;
         this.hoardQueued = true;
+
+        // Score
+        this.score = 0;
 
 
         // <------------------------- Object Children ----------------------------------> //
@@ -41,7 +49,6 @@ class Play extends Phaser.Scene {
         this.racecarFSM = new StateMachine('move', {
             move: new HorizontalMoveState(),
             transition: new VerticalTransitionState(),
-            damaged: new DamagedSpinOut()
         }, [this, this.racecar]);
 
 
@@ -53,7 +60,7 @@ class Play extends Phaser.Scene {
             color: '#ffffff',
             align: 'center',
         };
-        this.score = this.add.text(game.config.width / 2, 16, 
+        this.scoreText = this.add.text(game.config.width / 2, 16, 
             "000000000000000", scoreConfig).setOrigin(0.5, 0.5);
         
         // Create a label for displaying text in the middle of the screen
@@ -81,6 +88,8 @@ class Play extends Phaser.Scene {
         keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
         keyW = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
         keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
+        keyENTER = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
+        keyESC = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
 
 
         // <--------------------------------- Begin Game -----------------------------> //
@@ -92,10 +101,22 @@ class Play extends Phaser.Scene {
             this.newHoard(this.hoardInterval);
         }, null, this);
 
-        console.log("snoppomoppopiea");
+        console.log("smoppirkllis");
     }
 
     update () {
+        // Using this implementation cuz to allow for a death cutscene to work
+        if (!this.playerDied) {
+            this.gameplayUpdate();
+        }
+        else if (this.gameEnded) {
+            this.endUpdate();
+        }
+    }
+
+    gameplayUpdate () {
+        //console.log(this.racecar.currentHealth);
+
         // Update the game objects
         this.racecarFSM.step();
         this.obstacleWave.update();
@@ -104,20 +125,23 @@ class Play extends Phaser.Scene {
         // Player - obstacle collision
         if(this.obstacleWave.lane1Obstacle.isCollisionActive && this.checkCollision(this.racecar, this.obstacleWave.lane1Obstacle)) {
             this.obstacleWave.lane1Obstacle.disableObstacle();
-            if (this.racecar.takeDamage(1)) {
-                console.log("The player has died");
+            if (this.racecar.takeDamage(1, this)) {
+                // Remove player from the scene
+                this.playerExplodeCutscene();
             }
         }
         if(this.obstacleWave.lane2Obstacle.isCollisionActive && this.checkCollision(this.racecar, this.obstacleWave.lane2Obstacle)) {
             this.obstacleWave.lane2Obstacle.disableObstacle();
-            if (this.racecar.takeDamage(1)) {
-                console.log("The player has died");
+            if (this.racecar.takeDamage(1, this)) {
+                // Remove player from the scene
+                this.playerExplodeCutscene();
             }
         }
         if(this.obstacleWave.lane3Obstacle.isCollisionActive && this.checkCollision(this.racecar, this.obstacleWave.lane3Obstacle)) {
             this.obstacleWave.lane3Obstacle.disableObstacle();
-            if (this.racecar.takeDamage(1)) {
-                console.log("The player has died");
+            if (this.racecar.takeDamage(1, this)) {
+                // Remove player from the scene
+                this.playerExplodeCutscene();
             }
         }
 
@@ -137,6 +161,24 @@ class Play extends Phaser.Scene {
         else {
             this.wave1();
         }
+
+        // Update player score
+        this.score += 1;
+        this.scoreText.text = this.score.toString().padStart(7, '0');
+    }
+
+    endUpdate () {
+        // Check if player wants to do something else
+        if (Phaser.Input.Keyboard.JustDown(keyESC)) {
+            this.scene.start('menuScene');
+            return;
+        }
+        if (Phaser.Input.Keyboard.JustDown(keyENTER)) {
+            this.scene.restart();
+            return;
+        }
+
+        console.log("End");
     }
 
     wave1 () {
@@ -245,5 +287,16 @@ class Play extends Phaser.Scene {
           } else {
             return false;
           }
+    }
+
+    playerExplodeCutscene () {
+        console.log("The player has died");
+        this.racecar.destroy();
+        this.playerDied = true;
+
+        // Create explosion and create timer
+        this.time.delayedCall(2000, () => {
+            this.gameEnded = true;
+        }, null, this);
     }
 }

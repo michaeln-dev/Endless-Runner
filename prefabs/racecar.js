@@ -15,18 +15,55 @@ class Racecar extends Phaser.GameObjects.Sprite {
         this.transitionTime = 50; // in ms
 
         // Health variables
-        this.totalHealth = 3;
+        this.totalHealth = 1;
         this.currentHealth = this.totalHealth;
+        this.invulnerabilityTime = 1800;
         this.damaged = false;
+
+        // Engine Sound Effect
+        this.engineSound = scene.sound.add('engine_sound', {loop: true});
+        this.engineSound.play();
+
+        // Explosion Sound effect
+        this.explosionSound = scene.sound.add('racecar_explosion_sound');
     }
 
-    takeDamage (damageAmount) {
-        this.currentHealth -= damageAmount;
+    takeDamage (damageAmount, scene) {
+        // Only take damage if the player's damage flag is off
+        if (!this.damaged) {
+            this.currentHealth -= damageAmount;
+            this.damaged = true;
 
-        if (this.currentHealth <= 0) {
-            return true;
+            this.alpha = false;
+            this.startDamageFlashing(scene);
+
+            // Allow the player to take damage again after some time
+            scene.time.delayedCall(this.invulnerabilityTime, () => {
+                this.damaged = false;
+                this.stopDamageFlashing();
+            }, null, scene);
+
+            if (this.currentHealth <= 0) {
+                this.explosionSound.play();
+                this.engineSound.stop();
+                return true;
+            }
+            return false;
         }
-        return false;
+    }
+
+    startDamageFlashing (scene) {
+        this.flashTimer = scene.time.delayedCall(200, () => {
+            this.alpha = !this.alpha;
+
+            // Recursively keep calling this function until it's time to stop flashing the sprite
+            this.startDamageFlashing(scene);
+        }, null, scene);
+    }
+
+    stopDamageFlashing () {
+        this.flashTimer.paused = true;
+        this.alpha = true;
     }
 }
 
@@ -139,8 +176,4 @@ class VerticalTransitionState extends State {
             return;
         }
     }
-}
-
-class DamagedSpinOut extends State {
-
 }
