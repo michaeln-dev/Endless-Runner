@@ -7,6 +7,9 @@ class Menu extends Phaser.Scene {
         // load images
         this.load.image('racecar', './assets/racecar.png');
         this.load.image('dummycar', './assets/dummy_car.png');
+
+        // load sound effects
+        this.load.audio('ui_move', './assets/menu_move.wav');
     }
     
     create () {
@@ -51,6 +54,8 @@ class Menu extends Phaser.Scene {
         this.tutorialText = this.add.text(config.width/2, 300, 'TUTORIAL', this.unhighlightedConfig).setOrigin(0.5, 0.5);
         this.optionsText = this.add.text((config.width*3)/4, 300, 'OPTIONS', this.unhighlightedConfig).setOrigin(0.5, 0.5);
 
+        // <--------------------------- Sound effects -------------------------------> //
+        this.uiMoveSound = this.sound.add('ui_move');
         // <------------------------------ Keyboard Input ---------------------------> //
         // Define keys
         keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
@@ -89,12 +94,14 @@ class Menu extends Phaser.Scene {
         if (goingRight) {
             // If player is highlighted on the middle selection
             if (this.currentUIOption == 1) {
+                this.uiMoveSound.play();
                 this.tutorialText.setStyle(this.unhighlightedConfig);
                 this.optionsText.setStyle(this.highlightedConfig);
                 this.currentUIOption = 2;
             }
             // If player is highlighted on the leftmost selection
             else if (this.currentUIOption == 0) {
+                this.uiMoveSound.play();
                 this.startText.setStyle(this.unhighlightedConfig);
                 this.tutorialText.setStyle(this.highlightedConfig);
                 this.currentUIOption = 1;
@@ -103,12 +110,14 @@ class Menu extends Phaser.Scene {
         else {
             // If player is highlighted on the middle selection
             if (this.currentUIOption == 1) {
+                this.uiMoveSound.play();
                 this.tutorialText.setStyle(this.unhighlightedConfig);
                 this.startText.setStyle(this.highlightedConfig);
                 this.currentUIOption = 0;
             }
             // If player is highlighted on the rightmost selection
             else if (this.currentUIOption == 2) {
+                this.uiMoveSound.play();
                 this.optionsText.setStyle(this.unhighlightedConfig);
                 this.tutorialText.setStyle(this.highlightedConfig);
                 this.currentUIOption = 1;

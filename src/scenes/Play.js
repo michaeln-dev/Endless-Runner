@@ -6,10 +6,18 @@ class Play extends Phaser.Scene {
     preload () {
         // Load images
         this.load.image('road', './assets/road.png');
+        this.load.image('empty_heart', './assets/empty_heart.png');
+        this.load.image('full_heart', './assets/full_heart.png');
+
+        // Load sprite sheet
+        this.load.spritesheet('obstacle_explosion', './assets/obstacle_explosion.png', 
+            {frameWidth: 32, frameHeight: 32, startFrame: 0, endFrame: 5});
 
         // Load sound effects
         this.load.audio('engine_sound', './assets/engine_sound.wav');
         this.load.audio('racecar_explosion_sound', './assets/racecar_explosion.wav');
+        this.load.audio('player_hit', './assets/player_hit.wav');
+        this.load.audio('speed_up', './assets/speed_up.wav');
     }
     
     create () {
@@ -19,8 +27,8 @@ class Play extends Phaser.Scene {
         this.maxWaves = 5;
 
         // For every wave before the max wave, send a certain amount of hoards before the next wave
-        //this.hoardPerWave = [7, 5, 5, 6];
-        this.hoardPerWave = [1, 1, 1, 1];
+        this.hoardPerWave = [4, 8, 15, 18];
+        //this.hoardPerWave = [1, 1, 1, 1];
         this.hoardsSent = 0;
         this.hoardInterval = 500; // in ms
 
@@ -51,11 +59,31 @@ class Play extends Phaser.Scene {
             transition: new VerticalTransitionState(),
         }, [this, this.racecar]);
 
+        // Create health capsules
+        let healthUIX = config.width / 2;
+        let healthUIY = config.height / 1.06
+        this.leftHealth = this.add.sprite(healthUIX-64, healthUIY, 'full_heart').setOrigin(0.5, 0.5);
+        this.middleHealth = this.add.sprite(healthUIX, healthUIY, 'full_heart').setOrigin(0.5, 0.5);
+        this.rightHealth = this.add.sprite(healthUIX+64, healthUIY, 'full_heart').setOrigin(0.5, 0.5);
+
+
+        // <---------------------------- Animations -------------------> //
+        // animation config
+        this.anims.create ({
+            key: 'obstacle_explode',
+            frames: this.anims.generateFrameNumbers('obstacle_explosion', { start:0, end:5, first:0 }),
+            frameRate: 30
+        });
+
+        // <-------------------------- Audio -------------------------> //
+        this.hitSound = this.sound.add('player_hit');
+        this.speedUpSound = this.sound.add('speed_up');
+
 
         // <--------------------------- Text labels -------------------> //
         // Create a score label
         let scoreConfig = {
-            fontFamily: 'Courier',
+            fontFamily: 'Source Sans Pro',
             fontSize: '28px',
             color: '#ffffff',
             align: 'center',
@@ -65,13 +93,13 @@ class Play extends Phaser.Scene {
         
         // Create a label for displaying text in the middle of the screen
         let centerTextConfig = {
-            fontFamily: 'Courier',
+            fontFamily: 'Source Sans Pro',
             fontSize: '28px',
             color: '#ffffff',
             align: 'center'
         };
         this.centerText = this.add.text(game.config.width / 2, game.config.height / 2, 
-            "LETS GOOO", centerTextConfig).setOrigin(0.5, 0.5);
+            "BEGIN", centerTextConfig).setOrigin(0.5, 0.5);
         
         
         // <------------------------------ Timers -----------------------------------> //
@@ -100,8 +128,6 @@ class Play extends Phaser.Scene {
 
             this.newHoard(this.hoardInterval);
         }, null, this);
-
-        console.log("smoppirkllis");
     }
 
     update () {
@@ -125,23 +151,41 @@ class Play extends Phaser.Scene {
         // Player - obstacle collision
         if(this.obstacleWave.lane1Obstacle.isCollisionActive && this.checkCollision(this.racecar, this.obstacleWave.lane1Obstacle)) {
             this.obstacleWave.lane1Obstacle.disableObstacle();
+            let healthBefore = this.racecar.currentHealth;
             if (this.racecar.takeDamage(1, this)) {
                 // Remove player from the scene
                 this.playerExplodeCutscene();
+            }
+            let healthAfter = this.racecar.currentHealth;
+            if (healthBefore != healthAfter) {
+                this.hitSound.play();
+                this.decreaseHealthContainer();
             }
         }
         if(this.obstacleWave.lane2Obstacle.isCollisionActive && this.checkCollision(this.racecar, this.obstacleWave.lane2Obstacle)) {
             this.obstacleWave.lane2Obstacle.disableObstacle();
+            let healthBefore = this.racecar.currentHealth;
             if (this.racecar.takeDamage(1, this)) {
                 // Remove player from the scene
                 this.playerExplodeCutscene();
             }
+            let healthAfter = this.racecar.currentHealth;
+            if (healthBefore != healthAfter) {
+                this.hitSound.play();
+                this.decreaseHealthContainer();
+            }
         }
         if(this.obstacleWave.lane3Obstacle.isCollisionActive && this.checkCollision(this.racecar, this.obstacleWave.lane3Obstacle)) {
             this.obstacleWave.lane3Obstacle.disableObstacle();
+            let healthBefore = this.racecar.currentHealth;
             if (this.racecar.takeDamage(1, this)) {
                 // Remove player from the scene
                 this.playerExplodeCutscene();
+            }
+            let healthAfter = this.racecar.currentHealth;
+            if (healthBefore != healthAfter) {
+                this.hitSound.play();
+                this.decreaseHealthContainer();
             }
         }
 
@@ -177,8 +221,6 @@ class Play extends Phaser.Scene {
             this.scene.restart();
             return;
         }
-
-        console.log("End");
     }
 
     wave1 () {
@@ -188,6 +230,7 @@ class Play extends Phaser.Scene {
         if (!this.obstacleWave.hoardStarted && !this.hoardQueued) {
             if (this.hoardsSent == this.hoardPerWave[0]) {
                 // Time for next wave
+                this.speedUpSound.play();
                 this.newWave(2, "SPEED UP", 400);
             }
             else {
@@ -203,6 +246,7 @@ class Play extends Phaser.Scene {
         if (!this.obstacleWave.hoardStarted && !this.hoardQueued) {
             if (this.hoardsSent == this.hoardPerWave[1]) {
                 // Time for next wave
+                this.speedUpSound.play();
                 this.newWave(3, "SPEED UP", 300);
             }
             else {
@@ -217,6 +261,7 @@ class Play extends Phaser.Scene {
         if (!this.obstacleWave.hoardStarted && !this.hoardQueued) {
             if (this.hoardsSent == this.hoardPerWave[2]) {
                 // Time for next wave
+                this.speedUpSound.play();
                 this.newWave(4, "SPEED UP", 150);
             }
             else {
@@ -231,6 +276,7 @@ class Play extends Phaser.Scene {
         if (!this.obstacleWave.hoardStarted && !this.hoardQueued) {
             if (this.hoardsSent == this.hoardPerWave[3]) {
                 // Time for next wave
+                this.speedUpSound.play();
                 this.newWave(5, "MAX SPEED", 0);
             }
             else {
@@ -283,19 +329,82 @@ class Play extends Phaser.Scene {
     checkCollision (racecar, obstacle) {
         if (racecar.x < obstacle.x + obstacle.width && racecar.x + racecar.width > obstacle.x && 
             racecar.y < obstacle.y + obstacle.height && racecar.height + racecar.y > obstacle. y) {
+            let explode = this.add.sprite(obstacle.x, obstacle.y, 'obstacle_explosion').setOrigin(0.5, 0.5);
+            explode.setScale(2);
+            explode.anims.play('obstacle_explode');             // play explode animation
+            explode.on('animationcomplete', () => {    // callback after anim completes
+                explode.destroy();                       // remove explosion sprite
+            });
             return true;
           } else {
             return false;
           }
     }
 
+    decreaseHealthContainer () {
+        let textureKey = this.rightHealth.texture.key;
+        if (textureKey == 'full_heart') {
+            this.rightHealth.setTexture('empty_heart');
+            return;
+        }
+
+        textureKey = this.middleHealth.texture.key;
+        if (textureKey == 'full_heart') {
+            this.middleHealth.setTexture('empty_heart');
+            return;
+        }
+
+        textureKey = this.leftHealth.texture.key;
+        if (textureKey == 'full_heart') {
+            this.leftHealth.setTexture('empty_heart');
+            return;
+        }
+    }
+
     playerExplodeCutscene () {
-        console.log("The player has died");
         this.racecar.destroy();
         this.playerDied = true;
 
+        let explode = this.add.sprite(this.racecar.x, this.racecar.y, 'obstacle_explosion').setOrigin(0.5, 0.5);
+            explode.setScale(8);
+            explode.anims.play('obstacle_explode');             // play explode animation
+            explode.on('animationcomplete', () => {    // callback after anim completes
+                explode.destroy();                       // remove explosion sprite
+            });
+
         // Create explosion and create timer
         this.time.delayedCall(2000, () => {
+            // Add game over text
+            let gameOverConfig = {
+                fontFamily: "Source Sans Pro",
+                fontSize: '60px',
+                backgroundColor: '#b71e00',
+                color: '#ffffff',
+                align: 'center',
+                padding: {
+                    top: 5,
+                    bottom: 5,
+                    right: 10,
+                    left: 10
+                }
+            };
+            this.add.text(config.width/2, (config.height/2)-50, 'GAME OVER', gameOverConfig).setOrigin(0.5, 0.5);
+
+            // Add game over text
+            let gameOverOptionsConfig = {
+                fontFamily: "Source Sans Pro",
+                fontSize: '16px',
+                backgroundColor: '#b71e00',
+                color: '#ffffff',
+                align: 'center',
+                padding: {
+                    top: 5,
+                    bottom: 5,
+                    right: 10,
+                    left: 10
+                }
+            };
+            this.add.text(config.width/2, (config.height/2)+25, 'ENTER: RETRY STAGE\nESCAPE: BACK TO TITLE', gameOverOptionsConfig).setOrigin(0.5, 0.5);
             this.gameEnded = true;
         }, null, this);
     }

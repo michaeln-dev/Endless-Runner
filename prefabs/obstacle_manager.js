@@ -4,7 +4,7 @@ class ObstacleManager extends Phaser.GameObjects.Container {
         scene.add.existing(this);
 
         // <--------------------------- Container Management Variables -----------------> //
-        this.moveSpeed = 6;
+        this.moveSpeed = 8;
 
         // Positional variables
         this.startX = this.x;
@@ -48,8 +48,8 @@ class ObstacleManager extends Phaser.GameObjects.Container {
 
         // Find the probability
         if (this.currentWave == 2) {
-            // 20% chance of two obstacles, 80% chance of one
-            if (Phaser.Math.Between(1, 10) <= 2) {
+            // 30% chance of two obstacles, 70% chance of one
+            if (Phaser.Math.Between(1, 10) <= 3) {
                 this.createObstacles(this.getDoubleLaneArray());
             }
             else {
@@ -57,12 +57,9 @@ class ObstacleManager extends Phaser.GameObjects.Container {
             }
         }
         else if (this.currentWave == 3) {
-            // 2% chance of three obstacles, 40% chance of two, %58 chance of one
-            let probability = Phaser.Math.Between(1, 100);
-            if (probability <= 2) {
-                this.createObstacles(this.getTripleLaneArray());
-            }
-            else if (probability <= 42) {
+            // 50% chance of two obstacles, %50 chance of one
+            let probability = Phaser.Math.Between(1, 10);
+            if (probability <= 5) {
                 this.createObstacles(this.getDoubleLaneArray());
             }
             else {
@@ -70,12 +67,9 @@ class ObstacleManager extends Phaser.GameObjects.Container {
             }
         }
         else if (this.currentWave == 4) {
-            // 15% chance of three obstacles, 60% chance of two, %25 chance of one
-            let probability = Phaser.Math.Between(1, 100)
-            if (probability <= 15) {
-                this.createObstacles(this.getTripleLaneArray());
-            }
-            else if (probability <= 75) {
+            // 70% chance of two, %30 chance of one
+            let probability = Phaser.Math.Between(1, 10)
+            if (probability <= 7) {
                 this.createObstacles(this.getDoubleLaneArray());
             }
             else {
@@ -83,12 +77,9 @@ class ObstacleManager extends Phaser.GameObjects.Container {
             }
         }
         else if (this.currentWave == 5) {
-            // 50% chance of three obstacles, 45% chance of two, %5 chance of one
-            let probability = Phaser.Math.Between(1, 100)
-            if (probability <= 50) {
-                this.createObstacles(this.getTripleLaneArray());
-            }
-            else if (probability <= 95) {
+            // 90% chance of two, %10 chance of one
+            let probability = Phaser.Math.Between(1, 10)
+            if (probability <= 90) {
                 this.createObstacles(this.getDoubleLaneArray());
             }
             else {
@@ -164,10 +155,10 @@ class ObstacleManager extends Phaser.GameObjects.Container {
         this.currentWave = newWaveNumber;
 
         if (this.currentWave == 3) {
-            this.moveSpeed = 7;
+            this.moveSpeed = 10;
         }
         else if (this.currentWave == 5) {
-            this.moveSpeed = 9;
+            this.moveSpeed = 12;
         }
     }
 }

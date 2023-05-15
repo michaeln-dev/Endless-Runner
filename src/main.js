@@ -1,4 +1,10 @@
-// Time spent: 18 hours
+// Michael Nieto
+// CMPM-120
+// Retro Runway
+
+// Time spent: 25 hours
+
+// Creative Tilt:
 
 let config = {
     type: Phaser.CANVAS,

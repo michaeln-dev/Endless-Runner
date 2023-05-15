@@ -15,7 +15,7 @@ class Racecar extends Phaser.GameObjects.Sprite {
         this.transitionTime = 50; // in ms
 
         // Health variables
-        this.totalHealth = 1;
+        this.totalHealth = 3;
         this.currentHealth = this.totalHealth;
         this.invulnerabilityTime = 1800;
         this.damaged = false;
