@@ -217,6 +217,7 @@ class Play extends Phaser.Scene {
     endUpdate () {
         // Check if player wants to do something else
         if (Phaser.Input.Keyboard.JustDown(keyESC)) {
+            this.game.sound.stopAll();
             this.uiCancelSound.play();
             this.scene.start('menuScene');
             return;
