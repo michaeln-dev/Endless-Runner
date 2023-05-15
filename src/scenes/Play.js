@@ -78,6 +78,9 @@ class Play extends Phaser.Scene {
         // <-------------------------- Audio -------------------------> //
         this.hitSound = this.sound.add('player_hit');
         this.speedUpSound = this.sound.add('speed_up');
+        this.endPopupSound = this.sound.add('ui_move');
+        this.uiAcceptSound = this.sound.add('ui_accept');
+        this.uiCancelSound = this.sound.add('ui_cancel');
 
 
         // <--------------------------- Text labels -------------------> //
@@ -214,10 +217,12 @@ class Play extends Phaser.Scene {
     endUpdate () {
         // Check if player wants to do something else
         if (Phaser.Input.Keyboard.JustDown(keyESC)) {
+            this.uiCancelSound.play();
             this.scene.start('menuScene');
             return;
         }
         if (Phaser.Input.Keyboard.JustDown(keyENTER)) {
+            this.uiAcceptSound.play();
             this.scene.restart();
             return;
         }
@@ -375,6 +380,7 @@ class Play extends Phaser.Scene {
         // Create explosion and create timer
         this.time.delayedCall(2000, () => {
             // Add game over text
+            this.endPopupSound.play();
             let gameOverConfig = {
                 fontFamily: "Source Sans Pro",
                 fontSize: '60px',

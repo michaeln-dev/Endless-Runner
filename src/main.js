@@ -5,6 +5,14 @@
 // Time spent: 25 hours
 
 // Creative Tilt:
+// I think as far as technically interesting, I had a lot of learning to do with proper code structure
+// and using a finite state machine to understand better about classes and how to organize code in an
+// effective way.
+//
+// Creatively, I really liked how the pixel art assets came out, considering that I'm not really that 
+// good at pixel art or art in general. I really wanted to add my own music to the game, and I have
+// a song worked on for the game, but unfortunately due to time constraints, I was not able to add
+// that to the game.
 
 let config = {
     type: Phaser.CANVAS,
